@@ -8,10 +8,9 @@ import java.util.List;
 public interface BlogPostService {
     public List<EntityBlogPost> getPosts();
 
-    public EntityBlogPost addPost(AddBlogPostPayload newBlogPost);
+    public EntityBlogPost savePost(AddBlogPostPayload newBlogPost);
 
     public Long deletePost(Long postID);
 
-    public EntityBlogPost updatePost(Long postID, AddBlogPostPayload newBlogPost);
 
 }

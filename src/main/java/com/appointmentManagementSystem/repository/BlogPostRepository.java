@@ -7,10 +7,13 @@ import org.springframework.data.jpa.repository.Query;
 
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Optional;
 
 public interface BlogPostRepository extends JpaRepository<EntityBlogPost,Long> {
 
     List<EntityBlogPost> findAllByDeleted(boolean deleted);
+
+    Optional<EntityBlogPost> findByIdAndDeleted(Long id, boolean deleted);
 
     @Transactional
     @Modifying

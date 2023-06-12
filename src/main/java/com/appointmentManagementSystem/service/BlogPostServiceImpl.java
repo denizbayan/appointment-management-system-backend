@@ -23,32 +23,31 @@ public class BlogPostServiceImpl implements BlogPostService {
         return blogPostRepository.findAllByDeleted(false);
     }
 
-    public EntityBlogPost addPost(AddBlogPostPayload newBlogPost){
-        EntityBlogPost newPost = new EntityBlogPost();
-        newPost.setDeleted(false);
-        newPost.setContent(newBlogPost.getContent());
-        newPost.setTitle(newBlogPost.getTitle());
+    public EntityBlogPost savePost(AddBlogPostPayload newBlogPost){
 
-        return blogPostRepository.save(newPost);
+        if(newBlogPost.getId() == -1L){
+            EntityBlogPost newPost = new EntityBlogPost();
+            newPost.setDeleted(false);
+            newPost.setContent(newBlogPost.getContent());
+            newPost.setTitle(newBlogPost.getTitle());
+
+            return blogPostRepository.save(newPost);
+        }else{
+            Optional<EntityBlogPost> bp = blogPostRepository.findByIdAndDeleted(newBlogPost.getId(),false);
+            if (bp.isPresent()){
+                EntityBlogPost existingPost = bp.get();
+                existingPost.setContent(newBlogPost.getContent());
+                existingPost.setTitle(newBlogPost.getTitle());
+
+                return blogPostRepository.save(existingPost);
+            }else{
+                return null;
+            }
+        }
 
     }
 
     public Long deletePost(Long postID){return blogPostRepository.Updatedeleted(postID)==0?0L:1L;}
 
-    public EntityBlogPost updatePost(Long postID, AddBlogPostPayload newBlogPost){
-
-        Optional<EntityBlogPost> bp = blogPostRepository.findById(postID);
-
-        if(bp.isPresent()){
-            EntityBlogPost blogPost = bp.get();
-            blogPost.setContent(newBlogPost.getContent());
-            blogPost.setTitle(newBlogPost.getTitle());
-            return blogPostRepository.save(blogPost);
-
-        }else{
-            return null;
-        }
-
-    }
-
 }
+

@@ -19,31 +19,42 @@ public class BlogController {
     @Autowired
     BlogPostService blogPostService;
 
-    @PostMapping("/addPost")
-    @PreAuthorize(" hasRole('ADMIN')")
-    public ResponseEntity<MessageResponse> addBlogPost(@RequestBody AddBlogPostPayload newBlogPost){
-        blogPostService.addPost(newBlogPost);
-        return null;
-    }
-
     @GetMapping("/getPosts")
     public List<EntityBlogPost> getBlogPosts(){
         return blogPostService.getPosts();
 
     }
 
-    @PostMapping("/deletePost/{postID}")
+    @DeleteMapping("/deletePost/{postID}")
     @PreAuthorize(" hasRole('ADMIN')")
     public ResponseEntity<MessageResponse> deleteBlogPost(@PathVariable long postID){
         blogPostService.deletePost(postID);
         return null;
     }
 
-    @PostMapping("/updatePost/{postID}")
+    @PostMapping("/savePost")
     @PreAuthorize(" hasRole('ADMIN')")
-    public ResponseEntity<MessageResponse> updateBlogPost(@PathVariable long postID , @RequestBody AddBlogPostPayload newBlogPost){
-        blogPostService.updatePost(postID,newBlogPost);
-        return null;
+    public ResponseEntity<MessageResponse> updateBlogPost(@RequestBody AddBlogPostPayload newBlogPost){
+        EntityBlogPost response = blogPostService.savePost(newBlogPost);
+
+        if (response == null){
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Güncellemek istediğiniz blog içeriği bulunamamıştır. Lütfen sayfanızı yeniledikten sonra tekrar deneyiniz."));
+        }else{
+            if(newBlogPost.getId() == -1){
+                return ResponseEntity
+                        .ok()
+                        .body(new MessageResponse("Blog başarıyla eklenmiştir."));
+            }else{
+                return ResponseEntity
+                        .ok()
+                        .body(new MessageResponse("Blog başarıyla güncellenmiştir."));
+            }
+
+        }
+
+
     }
 
 }

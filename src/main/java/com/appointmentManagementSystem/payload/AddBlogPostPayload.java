@@ -9,6 +9,7 @@ import lombok.*;
 @ToString
 public class AddBlogPostPayload {
 
+    public Long id;
     public String title;
     public String content;
 }

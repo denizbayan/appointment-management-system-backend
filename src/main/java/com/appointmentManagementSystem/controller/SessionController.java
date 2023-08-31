@@ -1,5 +1,6 @@
 package com.appointmentManagementSystem.controller;
 
+import com.appointmentManagementSystem.model.EntityDictionaryWord;
 import com.appointmentManagementSystem.model.EntitySession;
 import com.appointmentManagementSystem.model.EntityUser;
 import com.appointmentManagementSystem.payload.AddSesssionPayload;
@@ -27,70 +28,45 @@ public class SessionController {
 
 
 
-    @PostMapping("/getSessions")
+    @GetMapping("/getSessions/{purpose}")
     @PreAuthorize(" hasRole('ADMIN')")
-    public List<EntitySession> getSessions(@RequestBody String purpose) {
+    public List<EntitySession> getSessions(@PathVariable String purpose) {
             return sessionService.findAll(purpose);
     }
 
-
-    @PostMapping("/addSession")
-    @PreAuthorize(" hasRole('ADMIN')")
-    public ResponseEntity<Long> addSession(@RequestBody AddSesssionPayload req){
-        try{
-            return new ResponseEntity<Long>(sessionService.addSession(req).getId(), HttpStatus.CREATED);
-        }catch (Exception e) {
-            e.printStackTrace();
-            if (e instanceof MessagingException) { // email error
-                return new ResponseEntity<Long>(-1L, HttpStatus.INTERNAL_SERVER_ERROR);
-            } else if (e instanceof CustomException && e.getMessage().contains("dolu")) { // 8 exhibitions active at the moment
-                return new ResponseEntity<Long>(-2L, HttpStatus.INTERNAL_SERVER_ERROR);
-            }else if (e instanceof CustomException && e.getMessage().contains("aynı isim")) { // same exhibition name in active timeline
-                return new ResponseEntity<Long>(-3L, HttpStatus.INTERNAL_SERVER_ERROR);
-            }else { // unknown error
-                return new ResponseEntity<Long>(-4L, HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-        }
+    @GetMapping("/getSessionsByUserId/{id}")
+    @PreAuthorize(" hasRole('USER')")
+    public List<EntitySession> getSessions(@PathVariable Long id) {
+        return sessionService.findSessionByUserId(id);
     }
 
-    @PostMapping("/updateSession")
-    @PreAuthorize(" hasRole('ADMIN')")
-    public ResponseEntity<MessageResponse> updateSession(@RequestBody AddSesssionPayload req){
 
-        try {
-            EntitySession newExhi = sessionService.updateSession(req);
-            if(newExhi == null){
+    @PostMapping("/saveSession")
+    @PreAuthorize(" hasRole('USER')")
+    public ResponseEntity<MessageResponse> saveSession(@RequestBody AddSesssionPayload sessionReq){
+
+        EntitySession response = sessionService.saveSession(sessionReq);
+
+        if (response == null){
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Güncellemek istediğiniz seans bulunamamıştır. Lütfen sayfanızı yeniledikten sonra tekrar deneyiniz."));
+        }else{
+            if(sessionReq.getSessionID() == -1){
                 return ResponseEntity
-                        .badRequest()
-                        .body(new MessageResponse("Hata: Etkinlik bulunamadı!"));
-            }else {
-                return new ResponseEntity<>(null, HttpStatus.OK);
+                        .ok()
+                        .body(new MessageResponse("Seans başarıyla eklenmiştir."));
+            }else{
+                return ResponseEntity
+                        .ok()
+                        .body(new MessageResponse("Seans başarıyla güncellenmiştir."));
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            if (e instanceof MessagingException) {
-                return new ResponseEntity<MessageResponse>(new MessageResponse("Mail gönderme başarısız oldu.Lütfen mail adreslerini kontrol ediniz"), HttpStatus.INTERNAL_SERVER_ERROR);
-            } else if (e instanceof CustomException){
-                return new ResponseEntity<MessageResponse>(new MessageResponse(e.getMessage()),HttpStatus.INTERNAL_SERVER_ERROR);
-            } else {
-                return new ResponseEntity<MessageResponse>(new MessageResponse("Mail gönderme başarısız oldu. Bazı kullanıcılara mail gitmemiş olabilir. Lütfen etkinliği tekrar güncelleyiniz."), HttpStatus.INTERNAL_SERVER_ERROR);
-            }
+
         }
     }
 
-    @PostMapping("/addPatientToSession/{sessionId}")
-    @PreAuthorize(" hasRole('ADMIN')")
-    public ResponseEntity<MessageResponse> addVisitorsToExhibition(@PathVariable Long sessionId,@RequestBody List<Long> visitorIdList){
-        try{
-            List<EntityUser> userList = sessionService.getUsersFromIdList(visitorIdList);
-            sessionService.addPatientToSession(sessionId,userList);
-            return new ResponseEntity<>(new MessageResponse(""), HttpStatus.CREATED);
-        } catch (Exception e) {
-            return new ResponseEntity<>(new MessageResponse("Katılımcı etkinliğe eklenemedi, lütfen tekrar deneyiniz."), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
 
-    @PostMapping("/deleteSessionById/{id}")
+    @DeleteMapping("/deleteSessionById/{id}")
     @PreAuthorize(" hasRole('ADMIN')")
     public ResponseEntity<MessageResponse> deleteSessionById(@PathVariable("id") long id) {
         try {

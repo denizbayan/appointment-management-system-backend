@@ -1,5 +1,6 @@
 package com.appointmentManagementSystem.service;
 
+import com.appointmentManagementSystem.enums.EnumVisitorStatus;
 import com.appointmentManagementSystem.model.EntitySession;
 import com.appointmentManagementSystem.model.EntitySessionPatient;
 import com.appointmentManagementSystem.model.EntityUser;
@@ -96,32 +97,84 @@ public class SessionServiceImpl implements SessionService{
    }
 
     @Override
-    @Transactional
-    public EntitySession addSession(AddSesssionPayload sessionPayload) throws Exception {
+    public List<EntitySession> findSessionByUserId(Long userId) {
 
-        EntitySession session = FillSessionObjectWithIDParams(sessionPayload);
-        return sessionRepository.save(session);
+        Optional<EntityUser> u = userRepository.findById(userId);
+
+        if(!u.isPresent()){
+            return null;
+        }else{
+            return sessionRepository.findByUserId(userId);
+        }
 
     }
 
 
     @Override
-    public EntitySession updateSession(AddSesssionPayload payload) throws Exception {
-        Optional<EntitySession> old = sessionRepository.findById(payload.getSessionID());
-        EntitySession sessionOld = old.get();
-        checkChangesForMail(payload, sessionOld);
+    public EntitySession saveSession(AddSesssionPayload sesssionPayload)  {
+        System.out.println(sesssionPayload.toString());
+        if(sesssionPayload.getSessionID() == -1L){
+            EntitySession newSession = new EntitySession();
+            newSession.setDeleted(false);
+            newSession.setSessionCount(1);
+            newSession.setDate(sesssionPayload.getSessionDate());
+            newSession.setStatus(sesssionPayload.getStatus());
 
-        sessionOld.setName(payload.getName());
-        sessionOld.setDate(payload.getDate());
-        
+            Optional<EntityUser> u1 = userService.getUserById(sesssionPayload.getPsychologistID());
+            if(u1.isPresent()){
+                newSession.setPsychologist_user(u1.get());
+            }else{
+                return null;
+            }
+
+            EntitySession session = sessionRepository.save(newSession);
 
 
-        return sessionRepository.save(sessionOld);
+            Optional<EntityUser> u = userService.getUserById(sesssionPayload.getPatientID());
+            if(u.isPresent()){
+                EntitySessionPatient sp = EntitySessionPatient.builder().patientSession(session).user(u.get()).status(WAITING).invitation(null).deleted(false).build();
+                sp = sessionPatientRepository.save(sp);
+                session.setPatient_user(sp);
+            }else{
+                return null;
+            }
+
+            session = sessionRepository.save(session);
+
+            return session;
+        }else{
+            Optional<EntitySession> s = sessionRepository.findByIdAndDeleted(sesssionPayload.getSessionID(),false);
+            if (s.isPresent()){
+                EntitySession session = s.get();
+                session.setStatus(sesssionPayload.getStatus());
+                Optional<EntityUser> u = userService.getUserById(sesssionPayload.getPatientID());
+                if(u.isPresent()){
+                    EntitySessionPatient sp = session.getPatient_user();
+                    sp.setUser(u.get());
+                    sp = sessionPatientRepository.save(sp);
+                    session.setPatient_user(sp);
+                }else{
+                    return null;
+                }
+
+
+                Optional<EntityUser> u1 = userService.getUserById(sesssionPayload.getPsychologistID());
+                if(u1.isPresent()){
+                    session.setPsychologist_user(u1.get());
+                }else{
+                    return null;
+                }
+
+                return sessionRepository.save(session);
+            }else{
+                return null;
+            }
+        }
     }
 
     private void checkChangesForMail(AddSesssionPayload payload, EntitySession exhibitionOld) throws MessagingException, IOException, URISyntaxException {
 
-        if (exhibitionOld.getDate().compareTo(payload.getDate())!=0){
+        if (exhibitionOld.getDate().compareTo(payload.getSessionDate())!=0){
             String updateMessage = "Tarih/Saat bilgisi güncellenmiştir.";
             sendExhibitionUpdateMail(payload, exhibitionOld, updateMessage);
         }
@@ -131,7 +184,7 @@ public class SessionServiceImpl implements SessionService{
     private void sendExhibitionUpdateMail(AddSesssionPayload payload, EntitySession exhibitionOld, String updateMessage) throws MessagingException, IOException, URISyntaxException {
         List<EntitySessionPatient> exhibitionVisitors = sessionPatientRepository.findBySession_Id(payload.getSessionID());
 
-        Instant instant = payload.getDate().toInstant();
+        Instant instant = payload.getSessionDate().toInstant();
         ZoneId z = ZoneId.of ("Europe/Istanbul");
         ZonedDateTime istanbul = instant.atZone(z);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy - HH:mm");
@@ -142,7 +195,7 @@ public class SessionServiceImpl implements SessionService{
 
             // create new calendar if date is updated
             if(updateMessage.contains("Tarih")){
-                iCalString = emailService.createCal(visitor.getUser(),payload.getDate());
+                iCalString = emailService.createCal(visitor.getUser(),payload.getSessionDate());
             }
             try{
                 Thread.sleep(500);
@@ -180,26 +233,13 @@ public class SessionServiceImpl implements SessionService{
 
     }
 
-    @Override
-    @Transactional
-    public Integer addPatientToSession(Long sessionId, List<EntityUser> visitors) throws Exception {
-        Optional<EntitySession> byId = sessionRepository.findById(sessionId);
-        EntitySession entitySession = byId.get();
-        for(EntityUser u : visitors){
-            EntitySessionPatient exVisit = EntitySessionPatient.builder().session(entitySession).user(u).status(ACCEPTED).deleted(false).build();
-            sessionPatientRepository.save(exVisit);
-        }
-
-        return 0;
-
-    }
 
     private void sendInformationMailToUser(EntityUser entityUser, EntitySession entityExhibition) throws IOException, MessagingException {
         Map<String, Object> model = new HashMap<String, Object>();
         model.put("name", entityUser.getFullname());
         model.put("link", Constant.HOST_NAME+"/login");
         model.put("paylasimLinki", Constant.HOST_NAME+"/register?id="+entityExhibition.getId());
-        model.put("exhibitionName", entityExhibition.getName());
+
 
         Instant instant = entityExhibition.getDate().toInstant();
         ZoneId z = ZoneId.of ("Europe/Istanbul");
@@ -244,23 +284,5 @@ public class SessionServiceImpl implements SessionService{
         sessionRepository.updateDeleted(id);
     }
 
-
-    /****************************** HELPER METHODS ******************************/
-
-    @Override
-    public List<EntityUser> getUsersFromIdList(List<Long> idList){
-        return userRepository.findAllById((Iterable<Long>) idList);
-    }
-
-    private EntitySession FillSessionObjectWithIDParams(AddSesssionPayload payload){
-        EntitySession ex = new EntitySession();
-
-        ex.setDate(payload.getDate());
-        ex.setName(payload.getName());
-
-        /** No operation performed for payload.getSelectedExhibitionAreas() and payload.isWelcomeArea() **/
-
-        return ex;
-    }
 
 }

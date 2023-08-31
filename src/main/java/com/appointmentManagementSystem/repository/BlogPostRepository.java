@@ -1,6 +1,7 @@
 package com.appointmentManagementSystem.repository;
 
 import com.appointmentManagementSystem.model.EntityBlogPost;
+import com.appointmentManagementSystem.payload.GetBlogPostsResponsePayload;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -10,6 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface BlogPostRepository extends JpaRepository<EntityBlogPost,Long> {
+
 
     List<EntityBlogPost> findAllByDeleted(boolean deleted);
 

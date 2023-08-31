@@ -1,9 +1,11 @@
 package com.appointmentManagementSystem.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -24,4 +26,9 @@ public class EntityBlogPost extends AbstractAuditableEntity  {
     public EntityUser user;
 
     public boolean deleted;
+
+    @JsonIgnore
+    @OrderBy("id")
+    @OneToMany(mappedBy = "post",fetch = FetchType.EAGER,cascade = CascadeType.REMOVE)
+    Set<EntityBlogPostInteraction> entityBlogPostInteractions;
 }

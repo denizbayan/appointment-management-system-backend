@@ -21,8 +21,8 @@ public class UserController {
     @Autowired
     UserService userService;
 
-    @PostMapping("/getUsers")
-    @PreAuthorize(" hasRole('ADMIN')")
+    @GetMapping("/getUsers")
+    @PreAuthorize(" hasRole('USER')")
     public Iterable<EntityUser> getUsers() {
         return userService.findAll();
     }
@@ -45,7 +45,7 @@ public class UserController {
         }
     }
 
-    @PostMapping("/updateUser")
+    @PutMapping("/updateUser")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<MessageResponse> updateUser(@RequestBody SignupRequest req){
 
@@ -69,7 +69,7 @@ public class UserController {
         }
     }
 
-    @PostMapping("/getUserById/{id}")
+    @GetMapping("/getUserById/{id}")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<EntityUser> getUserById(@PathVariable ("id")Long id){
 
@@ -80,27 +80,7 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    @PostMapping("/getUserAvatar")
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<MessageResponse> getUserAvatar(){
-
-        return new ResponseEntity<>(new MessageResponse(userService.getAvatar()), HttpStatus.OK);
-    }
-
-    @PostMapping("/setUserAvatar")
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<MessageResponse> setUserAvatar(@RequestBody String avatar){
-
-            if(userService.setAvatar(avatar)){
-                return new ResponseEntity<>(HttpStatus.OK);
-            }
-            else{
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            }
-            
-    }
-
-    @PostMapping("/deleteUserById/{id}")
+    @DeleteMapping("/deleteUserById/{id}")
     @PreAuthorize(" hasRole('ADMIN')")
     public ResponseEntity<MessageResponse> deleteUserById(@PathVariable("id") long id) {
         try {

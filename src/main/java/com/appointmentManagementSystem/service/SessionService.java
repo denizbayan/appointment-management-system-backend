@@ -9,13 +9,10 @@ import java.util.List;
 public interface SessionService {
     List<EntitySession> findAll(String purpose);
 
-    EntitySession addSession(AddSesssionPayload session) throws Exception;
+    List<EntitySession> findSessionByUserId(Long userId);
 
-    EntitySession updateSession(AddSesssionPayload  session) throws Exception;
-
-    Integer addPatientToSession(Long sessionId, List<EntityUser> visitors) throws Exception;
+    EntitySession saveSession(AddSesssionPayload  session) ;
 
     void deleteSessionById(long id) throws Exception;
 
-    List<EntityUser> getUsersFromIdList(List<Long> idList);
 }

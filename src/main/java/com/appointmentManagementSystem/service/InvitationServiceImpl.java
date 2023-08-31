@@ -84,7 +84,7 @@ public class InvitationServiceImpl implements InvitationService {
             EntitySessionPatientInvitation invitation = new EntitySessionPatientInvitation();
             EntityUser visitorUser = sessionPatient.getUser();
 
-            String link = generateLink(visitorUser,sessionPatient.getSession().getDate());
+            String link = generateLink(visitorUser,sessionPatient.getPatientSession().getDate());
             String invitationCode = generateInvitationCode();
             byte[] imageQr = generateQR(link);
 
@@ -128,7 +128,7 @@ public class InvitationServiceImpl implements InvitationService {
     @Transactional
     public void setTokenExpireStatus(EntitySessionPatientInvitation invitation) {
 
-        Date expireDate = new Date((invitation.getSessionPatient().getSession().getDate()).getTime() + jwtExpirationMs);
+        Date expireDate = new Date((invitation.getSessionPatient().getPatientSession().getDate()).getTime() + jwtExpirationMs);
 
         if(expireDate.before(new Date())){
                 EntitySessionPatient visitorUser = invitation.getSessionPatient();
@@ -195,7 +195,7 @@ public class InvitationServiceImpl implements InvitationService {
 
     private void sendMail(EntitySessionPatientInvitation saved) throws MessagingException, IOException {
         EntityUser user = saved.getSessionPatient().getUser();
-        EntitySession session = saved.getSessionPatient().getSession();
+        EntitySession session = saved.getSessionPatient().getPatientSession();
         /*StringBuilder base64 = new StringBuilder("data:image/png;base64,");
         base64.append(Base64.getEncoder().encodeToString(saved.getQrCode()));*/
 /*

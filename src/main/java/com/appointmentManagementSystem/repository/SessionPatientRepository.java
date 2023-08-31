@@ -18,14 +18,14 @@ public interface SessionPatientRepository extends JpaRepository<EntitySessionPat
         @Query("select sp from EntitySessionPatient  sp where sp.id =?1 and sp.deleted = false")
         Optional<EntitySessionPatient> findById(Long id);
 
-        @Query("select count(sp) from EntitySessionPatient sp where sp.session.id =?1 and sp.deleted = false")
+        @Query("select count(sp) from EntitySessionPatient sp where sp.patientSession.id =?1 and sp.deleted = false")
         long countBySession_Id(Long sessionId);
 
-        @Query("select sp from EntitySessionPatient sp where sp.deleted = false and sp.session.id =?1 ")
+        @Query("select sp from EntitySessionPatient sp where sp.deleted = false and sp.patientSession.id =?1 ")
         List<EntitySessionPatient> findBySession_Id(Long exhibition_id );
 
-        @Query("select new com.appointmentManagementSystem.payload.UserSessions(sp.user.id as userId, sp.session.id as sessionId,s.date as sessionDate , sp.id as sessionPatient ) from EntitySessionPatient sp \n"+
-                "left join EntitySession s on s.id = sp.session.id \n"+
+        @Query("select new com.appointmentManagementSystem.payload.UserSessions(sp.user.id as userId, sp.patientSession.id as sessionId,s.date as sessionDate , sp.id as sessionPatient ) from EntitySessionPatient sp \n"+
+                "left join EntitySession s on s.id = sp.patientSession.id \n"+
                 "where sp.user.id =?1 and s.deleted = false")
         Iterable<UserSessions> findSessionsOfUser(Long userID);
 

@@ -14,11 +14,14 @@ import java.util.*;
 @Repository
 public interface SessionRepository extends JpaRepository<EntitySession,Long> {
 
-    @Query("select e from EntitySession e where e.id =?1 and e.deleted = false")
-    Optional<EntitySession> findById(Long id);
+    @Query("select e from EntitySession e where e.id =?1 and e.deleted =?2")
+    Optional<EntitySession> findByIdAndDeleted(Long id,boolean deleted);
 
     @Query("select e from EntitySession e where e.deleted = false and e.date <:maxdate order by e.date desc")
     List<EntitySession> findAll(@Param("maxdate")Date maxdate);
+
+    @Query("select e from EntitySession e where e.deleted = false and e.patient_user.user.id =?1 order by e.date desc")
+    List<EntitySession> findByUserId(Long id);
 
 
     @Query("select e from EntitySession e where e.date > ?1 and e.deleted = false order by e.date asc")

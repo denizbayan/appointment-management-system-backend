@@ -209,7 +209,15 @@ public class UserServiceImpl implements UserService {
         }
         EntityUser user = u.get();
 
-        user.setEmail(request.getEmail());
+        if(request.getEmail()!=null)
+            user.setEmail(request.getEmail());
+        if(request.getBirthdate()!=null)
+            user.setBirthdate(request.getBirthdate());
+        if(request.getGender()!=null)
+            user.setGender(request.getGender());
+        if(request.getFullname()!=null)
+            user.setFullname(request.getFullname());
+
         if(request.getCellPhone()!=null)
             user.setCellPhone(request.getCellPhone());
         return userRepository.save(user);

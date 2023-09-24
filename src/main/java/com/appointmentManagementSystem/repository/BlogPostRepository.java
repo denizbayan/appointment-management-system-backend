@@ -20,5 +20,5 @@ public interface BlogPostRepository extends JpaRepository<EntityBlogPost,Long> {
     @Transactional
     @Modifying
     @Query("update EntityBlogPost bp set bp.deleted=true where bp.id=?1")
-    int Updatedeleted(Long postID);
+    int updateDeleted(Long postID);
 }

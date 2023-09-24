@@ -53,7 +53,7 @@ public interface InvitationRepository extends JpaRepository<EntitySessionPatient
     @Transactional
     @Modifying
     @Query("update EntitySessionPatientInvitation spi set spi.deleted=true where spi.id=?1")
-    Integer Updatedeleted(Long InvitationID);
+    Integer updateDeleted(Long InvitationID);
 
     @Transactional
     @Modifying

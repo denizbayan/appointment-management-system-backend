@@ -79,7 +79,7 @@ public class BlogPostServiceImpl implements BlogPostService {
 
     }
 
-    public Long deletePost(Long postID){return blogPostRepository.Updatedeleted(postID)==0?0L:1L;}
+    public Long deletePost(Long postID){return blogPostRepository.updateDeleted(postID)==0?0L:1L;}
 
 
 }

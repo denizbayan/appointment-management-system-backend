@@ -70,7 +70,7 @@ public class BlogPostInteractionServiceImpl implements BlogPostInteractionServic
 
     }
 
-    public Long deletePostInteraction(Long interactionID){return blogPostInteractionRepository.Updatedeleted(interactionID)==0?0L:1L;}
+    public Long deletePostInteraction(Long interactionID){return blogPostInteractionRepository.updateDeleted(interactionID)==0?0L:1L;}
 
 }
 

@@ -18,7 +18,7 @@ public interface BlogPostInteractionRepository extends JpaRepository<EntityBlogP
     @Transactional
     @Modifying
     @Query("update EntityBlogPostInteraction bpi set bpi.deleted=true where bpi.id=?1")
-    int Updatedeleted(Long interaction_id);
+    int updateDeleted(Long interaction_id);
 
     Optional<EntityBlogPostInteraction> findByIdAndDeleted(Long interaction_id, Boolean deleted);
 

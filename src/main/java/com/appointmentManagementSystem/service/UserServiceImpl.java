@@ -175,7 +175,7 @@ public class UserServiceImpl implements UserService {
             if(invitation.getSessionDate().after(startDate)){
                 invitationRepository.deleteById(invitation.getSessionPatientInvitationId());
             }else{
-                invitationRepository.Updatedeleted(invitation.getSessionPatientInvitationId());
+                invitationRepository.updateDeleted(invitation.getSessionPatientInvitationId());
             }
         });
 
@@ -190,7 +190,7 @@ public class UserServiceImpl implements UserService {
 
                 sessionPatientRepository.deleteById(session.getSessionPatientId());
             }else{
-                sessionPatientRepository.Updatedeleted(session.getSessionPatientId());
+                sessionPatientRepository.updateDeleted(session.getSessionPatientId());
             }
         });
     }

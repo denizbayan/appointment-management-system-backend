@@ -32,6 +32,6 @@ public interface SessionPatientRepository extends JpaRepository<EntitySessionPat
         @Transactional
         @Modifying
         @Query("update EntitySessionPatient sp set sp.deleted=true where sp.id=?1")
-        Integer Updatedeleted(Long exhibitionVisitorID);
+        Integer updateDeleted(Long exhibitionVisitorID);
 
 }

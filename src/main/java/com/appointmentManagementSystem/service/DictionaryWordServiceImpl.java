@@ -50,7 +50,7 @@ public class DictionaryWordServiceImpl implements DictionaryWordService {
 
     }
 
-    public Long deleteDictionaryWord(Long postID){return dictionaryWordRepository.Updatedeleted(postID)==0?0L:1L;}
+    public Long deleteDictionaryWord(Long postID){return dictionaryWordRepository.updateDeleted(postID)==0?0L:1L;}
 
 }
 

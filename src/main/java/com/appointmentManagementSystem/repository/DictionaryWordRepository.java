@@ -19,5 +19,5 @@ public interface DictionaryWordRepository extends JpaRepository<EntityDictionary
     @Transactional
     @Modifying
     @Query("update EntityDictionaryWord dw set dw.deleted=true where dw.id=?1")
-    int Updatedeleted(Long postID);
+    int updateDeleted(Long postID);
 }

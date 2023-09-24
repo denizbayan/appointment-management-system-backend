@@ -32,6 +32,6 @@ public interface SessionRepository extends JpaRepository<EntitySession,Long> {
     @Transactional
     @Modifying
     @Query("update EntitySession e set e.deleted=true where e.id=?1")
-    Void updateDeleted(Long exhibitionID);
+    Integer updateDeleted(Long exhibitionID);
 
 }

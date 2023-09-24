@@ -28,6 +28,7 @@ public class EntitySessionPatient extends AbstractAuditableEntity implements Ser
 
     @OneToOne
     @JsonIgnore
+    @ToString.Exclude
     @JoinColumn(name = "session_id",referencedColumnName = "id")
     public EntitySession patientSession;
 

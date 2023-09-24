@@ -147,16 +147,18 @@ public class SessionServiceImpl implements SessionService{
             if (s.isPresent()){
                 EntitySession session = s.get();
                 session.setStatus(sesssionPayload.getStatus());
-                Optional<EntityUser> u = userService.getUserById(sesssionPayload.getPatientID());
-                if(u.isPresent()){
-                    EntitySessionPatient sp = session.getPatient_user();
-                    sp.setUser(u.get());
+
+                Optional<EntitySessionPatient> p = sessionPatientRepository.findById(sesssionPayload.getPatientID());
+                if (p.isPresent()){
+                    EntitySessionPatient patient = p.get();
+                    EntityUser user = patient.getUser();
+                    EntitySessionPatient sp = EntitySessionPatient.builder().patientSession(session).user(user).status(WAITING).invitation(null).deleted(false).build();
                     sp = sessionPatientRepository.save(sp);
                     session.setPatient_user(sp);
+
                 }else{
                     return null;
                 }
-
 
                 Optional<EntityUser> u1 = userService.getUserById(sesssionPayload.getPsychologistID());
                 if(u1.isPresent()){
@@ -276,10 +278,10 @@ public class SessionServiceImpl implements SessionService{
             Optional<Long> inv = invitationRepository.findInvitationByUserIdAndSessionId(sessionPatient.getUser().getId(), id);
             if(inv.isPresent()){
                 Long invitationIdOfUser = inv.get();
-                invitationRepository.Updatedeleted(invitationIdOfUser);
+                invitationRepository.updateDeleted(invitationIdOfUser);
             }
 
-            sessionPatientRepository.Updatedeleted(sessionPatient.getId());
+            sessionPatientRepository.updateDeleted(sessionPatient.getId());
         }
         sessionRepository.updateDeleted(id);
     }
